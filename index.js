@@ -505,12 +505,14 @@
 				'26,27':1
 			}
 		}
-	];
+	],
 	_COLOR = ['#F00','#F93','#0CF','#F9C'],	//NPC颜色
 	_COS = [1,0,-1,0],
 	_SIN = [0,1,0,-1],
 	_LIFE = 5,				//玩家生命值
-	_SCORE = 0;				//玩家得分
+	_SCORE = 0,				//玩家得分
+	_MSG_PLAY = 'Press SPACE to play',
+	_MSG_PAUSE = 'Press SPACE to pause';
 
 	var game = new Game('canvas');
 	//启动页
@@ -567,8 +569,9 @@
 			switch(e.keyCode){
 				case 13:
 				case 32:
-				game.nextStage();
-				break;
+					game.nextStage();
+					document.getElementById('info').textContent = _MSG_PAUSE;
+					break;
 			}
 		});
 	})();
@@ -978,23 +981,30 @@
 			});
 			//事件绑定
 			stage.bind('keydown',function(e){
+				var info = document.getElementById('info');
 				switch(e.keyCode){
 					case 13: //回车
 					case 32: //空格
-					this.status = this.status==2?1:2;
-					break;
+						if (this.status==2){
+							this.status = 1;
+							info.textContent = _MSG_PAUSE;
+						}else{
+							this.status = 2;
+							info.textContent = _MSG_PLAY;
+						}
+						break;
 					case 39: //右
-					player.control = {orientation:0};
-					break;
+						player.control = {orientation:0};
+						break;
 					case 40: //下
-					player.control = {orientation:1};
-					break;
+						player.control = {orientation:1};
+						break;
 					case 37: //左
-					player.control = {orientation:2};
-					break;
+						player.control = {orientation:2};
+						break;
 					case 38: //上
-					player.control = {orientation:3};
-					break;
+						player.control = {orientation:3};
+						break;
 				}
 			});
 		});
@@ -1012,6 +1022,7 @@
 				context.textAlign = 'center';
 				context.textBaseline = 'middle';
 				context.fillText(_LIFE?'YOU WIN!':'GAME OVER',this.x,this.y);
+				document.getElementById('info').textContent = _MSG_PLAY;
 			}
 		});
 		//记分
@@ -1031,10 +1042,11 @@
 			switch(e.keyCode){
 				case 13: //回车
 				case 32: //空格
-				_SCORE = 0;
-				_LIFE = 5;
-				game.setStage(1);
-				break;
+					_SCORE = 0;
+					_LIFE = 5;
+					game.setStage(1);
+					document.getElementById('info').textContent = _MSG_PAUSE;
+					break;
 			}
 		});
 	})();
