@@ -1,0 +1,11 @@
+{
+  "name": "pac-man",
+  "description": "Pac-Man",
+  "scripts": {
+    "start": "electron --enable-accelerated-mjpeg-decode --enable-accelerated-video --ignore-gpu-blacklist --enable-native-gpu-memory-buffers --enable-gpu-rasterization electron.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/e2tha-e/pacman-mumuy.git"
+  }
+}

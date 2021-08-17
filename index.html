@@ -1,46 +1,52 @@
 <html>
-	<head>
-		<meta charset="utf8">
-		<title>Pac-Man</title>
-		<meta name="description" content="吃豆人（Pac-Man）是上世纪80年代一款经典街机游戏，游戏的主角小精灵的形象甚至被作为一种大众文化符号。本游戏使用HTML5完美移植该游戏，设置了多个关卡并改良了幽灵的寻路算法，可作为Canvas游戏学习的案例演示。">
-		<meta name="keywords" content="吃豆人,FC吃豆子,吃豆游戏,Pac-Man,HTML5游戏,Javascript游戏引擎">
-		<link rel="shortcut icon" href="favicon.png">
-		<style>
-			body{
-				margin: 0;
+    <head>
+        <meta charset="utf8">
+        <title>Pac-Man</title>
+        <link rel="shortcut icon" href="favicon.png">
+        <style>
+            body{
+                margin: 0;
                 overflow: hidden;
-				padding: 0;
-			}
-			#wrapper{
-				border-right: 1px solid #000;
-				color: #999;
-				margin: 0 auto;
+                padding: 0;
+            }
+            #wrapper{
+                color: #999;
+                margin: 0 auto;
                 position: relative;
-				top: -67px;
-				left: -96px;
-				transform: scale(0.8);
-				width: 960px;
-			}
-			canvas{
-				background: #000;
-				display: block;
-			}
-			#info{
-				color: #000;
+                top: -67px;
+                left: -96px;
+                transform: scale(0.8);
+                width: 960px;
+            }
+            canvas{
+                display: block;
+                top: 0;
+            }
+            #maze{
+                background: #000;
+                position: relative;
+            }
+            #pacd,#char{
+                position: absolute;
+            }
+            #info{
+                color: #000;
                 font-family: Helvetica, sans-serif;
-				font-size: 20px;
-				font-weight: bold;
-				line-height: 34px;
-				text-align: center;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="wrapper">
-			<canvas id="canvas" width="960" height="640">不支持画布</canvas>
+                font-size: 20px;
+                font-weight: bold;
+                line-height: 34px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <canvas id="maze" width="960" height="640">Canvas is not supported</canvas>
+            <canvas id="pacd" width="960" height="640">Canvas is not supported</canvas>
+            <canvas id="char" width="960" height="640">Canvas is not supported</canvas>
             <div id="info">Press SPACE to play</div>
-		</div>
-		<script src="game.js"></script>
-		<script src="index.js"></script>
-	</body>
+        </div>
+        <script src="game.js"></script>
+        <script src="index.js"></script>
+    </body>
 </html>
