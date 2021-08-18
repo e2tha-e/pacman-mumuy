@@ -566,19 +566,6 @@
             }
         });
 
-        // Start screen copyright info
-        stage.createItem({
-            x:game.width-12,
-            y:game.height-5,
-            draw:function(pacdContext){
-                pacdContext.font = '14px Helvetica';
-                pacdContext.textAlign = 'right';
-                pacdContext.textBaseline = 'bottom';
-                pacdContext.fillStyle = '#AAA';
-                pacdContext.fillText('© passer-by.com',this.x,this.y);
-            }
-        });
-
         // Keydown event bindings
         stage.bind('keydown',function(e){
             switch(e.keyCode){
