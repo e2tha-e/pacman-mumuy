@@ -571,11 +571,16 @@
             switch(e.keyCode){
                 case 13:
                 case 32:
+                    stage.audio.opening.pause();
                     game.nextStage();
                     document.getElementById('info').textContent = _MSG_PAUSE;
                     break;
             }
         });
+
+        stage.createAudioHandler('opening');
+        stage.audio.opening.load();
+        stage.audio.opening.play();
     })();
 
     // Game master program
@@ -593,10 +598,9 @@
                                 if(dx*dx+dy*dy<750&&item.status!=4){ // Non-exception status
                                     if(item.status==3){
                                         item.status = 4;
-                                        _SCORE += 10;
                                     }else{
                                         stage.status = 3;
-                                        stage.timeout = 30;
+                                        stage.timeout = 120;
                                     }
                                 }
                             }
@@ -805,6 +809,9 @@
             });
 
             // NPC
+            stage.createAudioHandler('eating_npc');
+            stage.audio.eating_npc.load(stage.audioPlaying);
+
             for(var i=0;i<4;i++){
                 stage.createItem({
                     width:30,
@@ -844,6 +851,8 @@
                                         if(this.path.length){
                                             this.vector = this.path[0];
                                         }
+                                        stage.audioLast = '';
+                                        this.audioLast = '';
                                     }
                                 }else if(this.status==3){
                                     new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
@@ -873,6 +882,15 @@
                                         this.vector = this.path[0];
                                     }else{
                                         this.status = 1;
+                                    }
+                                    if(this.audioLast!='eating_npc'){
+                                        if(stage.audioPlaying.includes('siren')){
+                                            stage.audio.siren.pause();
+                                        }
+                                        stage.audio.eating_npc.play();
+                                        this.audioLast = 'eating_npc';
+                                        // A more accurate place to score when NPC gets eaten
+                                        _SCORE += 10;
                                     }
                                 }
                                 // Whether to change direction
@@ -951,7 +969,18 @@
             }
             items = stage.getItemsByType(2);
 
+            stage.createAudioHandler('eating_bean');
+            stage.createAudioHandler('eating_energy');
+            stage.createAudioHandler('siren');
+            stage.createAudioHandler('die');
+            stage.audio.eating_bean.load(stage.audioPlaying);
+            stage.audio.eating_energy.load(stage.audioPlaying);
+            stage.audio.siren.load(stage.audioPlaying);
+            stage.audio.die.load(stage.audioPlaying);
+
             // Protagonist (Pac-Man)
+            var hasBean = false;
+            var hasEnergy = false;
             player = stage.createItem({
                 width:30,
                 height:30,
@@ -983,9 +1012,11 @@
                             // Eat beans
                             if(!beans.get(this.coord.x,this.coord.y)){
                                 _SCORE++;
+                                hasBean = true;
                                 beans.set(this.coord.x,this.coord.y,1);
                                 // Eat energy beans
                                 if(config['energy'][this.coord.x+','+this.coord.y]){
+                                    hasEnergy = true;
                                     // Eat NPC
                                     items.forEach(function(item){
                                         // If the NPC is healthy, set it to a temporary state
@@ -999,31 +1030,60 @@
                             this.x += this.speed*_COS[this.orientation];
                             this.y += this.speed*_SIN[this.orientation];
                         }
+                        if(hasBean){
+                            if(!stage.audioPlaying.includes('eating_bean')){
+                                if(hasEnergy){
+                                    if(stage.audioPlaying.includes('siren')){
+                                        stage.audio.siren.pause();
+                                    }
+                                    stage.audio.eating_energy.play();
+                                    stage.audioLast = 'siren';
+                                    hasEnergy = false;
+                                }else{
+                                    if(
+                                        !stage.audioPlaying.includes('siren')&&
+                                        stage.audioLast!='siren'
+                                    ){
+                                        stage.audio.eating_bean.play();
+                                    }
+                                }
+                                hasBean = false;
+                            }
+                        }
+                        if(stage.audioLast=='siren'){
+                            if(
+                                !stage.audioPlaying.includes('eating_bean')&&
+                                !stage.audioPlaying.includes('eating_energy')&&
+                                !stage.audioPlaying.includes('eating_npc')
+                            ){
+                                stage.audio.siren.play();
+                            }
+                        }
                     }
                 },
                 draw:function(pacdContext, charContext){
-                    if(stage.status==1){
-                        pacdContext.fillStyle = '#000';
-                        pacdContext.fillRect(this.x-9,this.y-9,18,18);
-                        charContext.fillStyle = '#FFE600';
-                        charContext.beginPath();
-                        // The player is in a normal state
-                        if(stage.status!=3){
-                            if(this.times%2){
-                                charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.20)*Math.PI,(.5*this.orientation-.20)*Math.PI,false);
-                            }else{
-                                charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.01)*Math.PI,(.5*this.orientation-.01)*Math.PI,false);
-                            }
-                        // The player has been touched by an NPC
+                    pacdContext.fillStyle = '#000';
+                    pacdContext.fillRect(this.x-9,this.y-9,18,18);
+                    charContext.fillStyle = '#FFE600';
+                    charContext.beginPath();
+                    // The player is in a normal state
+                    if(stage.status!=3){
+                        if(this.times%2){
+                            charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.20)*Math.PI,(.5*this.orientation-.20)*Math.PI,false);
                         }else{
-                            if(stage.timeout){
-                                charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+1-.02*stage.timeout)*Math.PI,(.5*this.orientation-1+.02*stage.timeout)*Math.PI,false);
-                            }
+                            charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.01)*Math.PI,(.5*this.orientation-.01)*Math.PI,false);
                         }
-                        charContext.lineTo(this.x,this.y);
-                        charContext.closePath();
-                        charContext.fill();
+                    // The player has been touched by an NPC
+                    }else{
+                        var timeoutOffset = stage.timeout-90;
+                        if(timeoutOffset>0){
+                            stage.audio.die.play();
+                            charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+1-.02*timeoutOffset)*Math.PI,(.5*this.orientation-1+.02*timeoutOffset)*Math.PI,false);
+                        }
                     }
+                    charContext.lineTo(this.x,this.y);
+                    charContext.closePath();
+                    charContext.fill();
                     if(stage.nextStage){
                         pacdContext.fillRect(this.x-(this.width/2),this.y-(this.height/2),this.width,this.height);
                     }

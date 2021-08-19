@@ -52,6 +52,52 @@ function Game(mazeEl, pacdEl, charEl, params){
     var _index=0, // The current stage index
         _handler; // Frame animation control
 
+    // Begin AudioHandler definition
+    var AudioHandler = function(params){
+        this._params = {};
+        this._settings = {
+            name:'',
+            uri:'',
+            element:null,
+            playing:[]
+        };
+        if(typeof params=='string'){
+            this._settings.name = params;
+            this._settings.uri = 'audio/'+params+'.mp3';
+        }else if(params instanceof Object){
+            this._params = params;
+        }
+        Object.assign(this,this._settings,this._params);
+    }
+    AudioHandler.prototype.load = function(playing){
+        var audioHandler = this;
+        this.element = new Audio(this.uri);
+        this.playing = playing||this.playing;
+        this.element.addEventListener('ended', function(){
+            var indexOfName = audioHandler.playing.indexOf(audioHandler.name);
+            if (indexOfName>-1){
+                audioHandler.playing.splice(indexOfName,1);
+            }
+        });
+        return this;
+    };
+    AudioHandler.prototype.play = function(){
+        if(!this.playing.includes(this.name)){
+            this.playing.push(this.name);
+        }
+        this.element.play();
+        return this;
+    };
+    AudioHandler.prototype.pause = function(){
+        var indexOfName = this.playing.indexOf(this.name);
+        if (indexOfName>-1){
+            this.playing.splice(indexOfName,1);
+        }
+        this.element.pause();
+        return this;
+    };
+    // End AudioHandler definition
+
     // Begin Item definition
     var Item = function(params){
         this._params = params||{};
@@ -65,6 +111,7 @@ function Game(mazeEl, pacdEl, charEl, params){
             type:0, // 0 for normal objects (not tied to the map), 1 for player control objects, 2 for program control objects
             color:'#F00',
             status:1, // 0 for inactive/ended, 1 for normal, 2 for paused, 3 for temporary, 4 for exception
+            audioLast:'',
             orientation:0, // 0 for right, 1 for down, 2 for left, 3 for up
             speed:0,
             // Map-related
@@ -252,7 +299,9 @@ function Game(mazeEl, pacdEl, charEl, params){
             index:0,
             status:0, // 0 for inactive/ended, 1 for normal, 2 for paused, 3 for temporary state
             maps:[],
-            audio:[],
+            audio:{},
+            audioPlaying:[],
+            audioLast:'',
             images:[],
             items:[],
             timeout:0, // For determining when to proceed to next animation state
@@ -260,6 +309,11 @@ function Game(mazeEl, pacdEl, charEl, params){
             update:function(){ return true; }
         };
         Object.assign(this,this._settings,this._params);
+    };
+    Stage.prototype.createAudioHandler = function(options){
+        var audio = new AudioHandler(options);
+        this.audio[audio.name] = audio;
+        return audio;
     };
     Stage.prototype.createItem = function(options){
         var item = new Item(options);
