@@ -1062,8 +1062,8 @@
                     }
                 },
                 draw:function(pacdContext, charContext){
+                    pacdContext.fillStyle = '#000';
                     if(!this.coord.offset&&beans.get(this.coord.x,this.coord.y)){
-                        pacdContext.fillStyle = '#000';
                         pacdContext.fillRect(this.x-9,this.y-9,18,18);
                     }
                     charContext.fillStyle = '#FFE600';
@@ -1086,6 +1086,9 @@
                     charContext.lineTo(this.x,this.y);
                     charContext.closePath();
                     charContext.fill();
+                    if(stage.nextStage){
+                        pacdContext.fillRect(this.x-(this.width/2),this.y-(this.height/2),this.width,this.height);
+                    }
                 }
             });
 
