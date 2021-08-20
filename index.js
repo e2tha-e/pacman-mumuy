@@ -823,7 +823,7 @@
                     vector:{x:12+i,y:14},
                     type:2,
                     frames:10,
-                    speed:1.25,
+                    speed:1,
                     timeout:Math.floor(Math.random()*120),
                     update:function(){
                         if(stage.status==1){
@@ -988,7 +988,7 @@
                 location:map,
                 coord:{x:13.5,y:23},
                 orientation:2,
-                speed:2.5,
+                speed:2,
                 frames:10,
                 update:function(){
                     if(stage.status==1){
