@@ -318,6 +318,9 @@ function Game(mazeEl, pacdEl, charEl, params){
     Stage.prototype.createItem = function(options){
         var item = new Item(options);
         if(item.location){
+            // Need to account for Pac-Man starting at a decimal (centered) x coordinate
+            // The other items are unaffected
+            item.coord.x=Math.floor(item.coord.x);
             Object.assign(item,item.location.coord2position(item.coord.x,item.coord.y));
         }
         item._stage = this;

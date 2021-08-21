@@ -986,7 +986,7 @@
                 height:30,
                 type:1,
                 location:map,
-                coord:{x:13.5,y:23},
+                coord:{x:13.5,y:23}, // x is 13.5 to start at the center. Never a decimal thereafter
                 orientation:2,
                 speed:2,
                 frames:10,
@@ -1047,7 +1047,6 @@
                                         stage.audio.eating_bean.play();
                                     }
                                 }
-                                hasBean = false;
                             }
                         }
                         if(stage.audioLast=='siren'){
@@ -1062,9 +1061,12 @@
                     }
                 },
                 draw:function(pacdContext, charContext){
-                    pacdContext.fillStyle = '#000';
-                    if(!this.coord.offset&&beans.get(this.coord.x,this.coord.y)){
-                        pacdContext.fillRect(this.x-9,this.y-9,18,18);
+                    if(hasBean){
+                        var beanCoord = this.location.position2coord(this.x,this.y);
+                        var beanPos = this.location.coord2position(beanCoord.x,beanCoord.y);
+                        pacdContext.fillStyle = '#000';
+                        pacdContext.fillRect(beanPos.x-7,beanPos.y-7,14,14);
+                        hasBean = false;
                     }
                     charContext.fillStyle = '#FFE600';
                     charContext.beginPath();
@@ -1086,9 +1088,6 @@
                     charContext.lineTo(this.x,this.y);
                     charContext.closePath();
                     charContext.fill();
-                    if(stage.nextStage){
-                        pacdContext.fillRect(this.x-(this.width/2),this.y-(this.height/2),this.width,this.height);
-                    }
                 }
             });
 
