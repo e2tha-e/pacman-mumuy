@@ -199,8 +199,8 @@ function Game(mazeEl, pacdEl, charEl, params){
             offset:Math.sqrt(fx*fx+fy*fy)
         };
     };
-    // Addressing algorithm
-    Map.prototype.finder = function(params){
+    // Pathfinding algorithm
+    Map.prototype.finder = function(params, item, items){
         var defaults = {
             map:null,
             start:{},
@@ -209,10 +209,13 @@ function Game(mazeEl, pacdEl, charEl, params){
         };
         var options = Object.assign({},defaults,params);
         // When the start or end point is set on the wall
-        if(options.map[options.start.y][options.start.x]||options.map[options.end.y][options.end.x]){
+        if(
+            (options.map[options.start.y][options.start.x]!=0&&options.map[options.start.y][options.start.x]!=2)||
+            (options.map[options.end.y][options.end.x]!=0&&options.map[options.end.y][options.end.x]!=2)
+        ){
             return [];
         }
-        var finded = false;
+        var found = false;
         var result = [];
         var y_length  = options.map.length;
         var x_length = options.map[0].length;
@@ -224,6 +227,18 @@ function Game(mazeEl, pacdEl, charEl, params){
         // Gets the value on the map
         var _getValue = function(x,y){
             if(options.map[y]&&typeof options.map[y][x]!='undefined'){
+                // NPC treats other NPCs that are not eaten as a wall
+                for(var i=0, l=items.length; i<l; i++){
+                    if(
+                        item._id!=items[i]._id&&
+                        item.status!=4&&
+                        items[i].status!=4&&
+                        items[i].coord.x==x&&
+                        items[i].coord.y==y
+                    ){
+                        return 1;
+                    }
+                }
                 return options.map[y][x];
             }
             return -1;
@@ -248,7 +263,7 @@ function Game(mazeEl, pacdEl, charEl, params){
             var next = function(from,to){
                 var value = _getValue(to.x,to.y);
                 // Whether the current point can go
-                if(value<1){
+                if(value<1||value==2){
                     if(value==-1){
                         to.x = (to.x+x_length)%x_length;
                         to.y = (to.y+y_length)%y_length;
@@ -256,7 +271,7 @@ function Game(mazeEl, pacdEl, charEl, params){
                     }
                     if(to.x==options.end.x&&to.y==options.end.y){
                         steps[to.y][to.x] = from;
-                        finded = true;
+                        found = true;
                     }else if(!steps[to.y][to.x]){
                         steps[to.y][to.x] = from;
                         new_list.push(to);
@@ -269,12 +284,12 @@ function Game(mazeEl, pacdEl, charEl, params){
                 next(current,{y:current.y-1,x:current.x});
                 next(current,{y:current.y,x:current.x-1});
             });
-            if(!finded&&new_list.length){
+            if(!found&&new_list.length){
                 _render(new_list);
             }
         };
         _render([options.start]);
-        if(finded){
+        if(found){
             var current=options.end;
             if(options.type=='path'){
                 while(current.x!=options.start.x||current.y!=options.start.y){
@@ -468,7 +483,7 @@ function Game(mazeEl, pacdEl, charEl, params){
         if(_index<_stages.length-1){
             return this.setStage(++_index);
         }else{
-            throw new Error('unfound new stage.');
+            throw new Error('Cannot find new stage.');
         }
     };
     this.getStages = function(){

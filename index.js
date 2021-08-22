@@ -835,19 +835,12 @@
                             if(!this.coord.offset){
                                 if(this.status==1){
                                     if(!this.timeout){
-                                        new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                         var id = this._id;
-                                        items.forEach(function(item){
-                                            // NPC treats all other NPCs that are still in a normal state as a wall
-                                            if(item._id!=id&&item.status==1){
-                                                new_map[item.coord.y][item.coord.x]=1;
-                                            }
-                                        });
                                         this.path = map.finder({
-                                            map:new_map,
+                                            map:map.data,
                                             start:this.coord,
                                             end:player.coord
-                                        });
+                                        }, this, items);
                                         if(this.path.length){
                                             this.vector = this.path[0];
                                         }
@@ -855,29 +848,22 @@
                                         this.audioLast = '';
                                     }
                                 }else if(this.status==3){
-                                    new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                     var id = this._id;
-                                    items.forEach(function(item){
-                                        if(item._id!=id){
-                                            new_map[item.coord.y][item.coord.x]=1;
-                                        }
-                                    });
                                     this.path = map.finder({
-                                        map:new_map,
+                                        map:map.data,
                                         start:player.coord,
                                         end:this.coord,
                                         type:'next'
-                                    });
+                                    }, this, items);
                                     if(this.path.length){
                                         this.vector = this.path[Math.floor(Math.random()*this.path.length)];
                                     }
                                 }else if(this.status==4){
-                                    new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                     this.path = map.finder({
-                                        map:new_map,
+                                        map:map.data,
                                         start:this.coord,
                                         end:this._params.coord
-                                    });
+                                        }, this, items);
                                     if(this.path.length){
                                         this.vector = this.path[0];
                                     }else{
