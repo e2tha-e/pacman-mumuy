@@ -199,7 +199,7 @@ function Game(mazeEl, pacdEl, charEl, params){
             offset:Math.sqrt(fx*fx+fy*fy)
         };
     };
-    // Pathfinding algorithm
+    // Pathfinding algorithm for autonomous NPCs
     Map.prototype.finder = function(params, item, items){
         var defaults = {
             map:null,
@@ -246,7 +246,7 @@ function Game(mazeEl, pacdEl, charEl, params){
         // Decide if you can go, then go and put it in the list
         var _next = function(to){
             var value = _getValue(to.x,to.y);
-            if(value<1){
+            if(value<1||value==2){
                 if(value==-1){
                     to.x = (to.x+x_length)%x_length;
                     to.y = (to.y+y_length)%y_length;
@@ -440,9 +440,6 @@ function Game(mazeEl, pacdEl, charEl, params){
                     }
                     // Neither the stage nor the item is paused
                     if(stage.status==1&&item.status!=2){
-                        if(item.location){
-                            item.coord = item.location.position2coord(item.x,item.y);
-                        }
                         if(item.timeout){
                             item.timeout--;
                         }

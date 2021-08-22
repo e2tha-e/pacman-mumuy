@@ -900,6 +900,7 @@
                             }
                             this.x += this.speed*_COS[this.orientation];
                             this.y += this.speed*_SIN[this.orientation];
+                            this.coord = this.location.position2coord(this.x,this.y);
                         }
                     },
                     draw:function(pacdContext, charContext){
@@ -994,7 +995,6 @@
                                 this.x -= map.size*(map.x_length-1)*_COS[this.orientation];
                                 this.y -= map.size*(map.y_length-1)*_SIN[this.orientation];
                             }
-                        }else{
                             // Eat beans
                             if(!beans.get(this.coord.x,this.coord.y)){
                                 _SCORE++;
@@ -1013,9 +1013,11 @@
                                     });
                                 }
                             }
+                        }else{
                             this.x += this.speed*_COS[this.orientation];
                             this.y += this.speed*_SIN[this.orientation];
                         }
+                        this.coord = this.location.position2coord(this.x,this.y);
                         if(hasBean){
                             if(!stage.audioPlaying.includes('eating_bean')){
                                 if(hasEnergy){
