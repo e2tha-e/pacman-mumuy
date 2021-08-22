@@ -966,6 +966,7 @@
             stage.audio.die.load(stage.audioPlaying);
 
             // Protagonist (Pac-Man)
+            var beanCoord = {};
             var hasBean = false;
             var hasEnergy = false;
             player = stage.createItem({
@@ -998,6 +999,8 @@
                             // Eat beans
                             if(!beans.get(this.coord.x,this.coord.y)){
                                 _SCORE++;
+                                beanCoord.x = this.coord.x;
+                                beanCoord.y = this.coord.y;
                                 hasBean = true;
                                 beans.set(this.coord.x,this.coord.y,1);
                                 // Eat energy beans
@@ -1050,10 +1053,11 @@
                 },
                 draw:function(pacdContext, charContext){
                     if(hasBean){
-                        var beanCoord = this.location.position2coord(this.x,this.y);
                         var beanPos = this.location.coord2position(beanCoord.x,beanCoord.y);
                         pacdContext.fillStyle = '#000';
                         pacdContext.fillRect(beanPos.x-7,beanPos.y-7,14,14);
+                        delete beanCoord.x;
+                        delete beanCoord.y;
                         hasBean = false;
                     }
                     charContext.fillStyle = '#FFE600';
