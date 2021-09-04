@@ -517,9 +517,9 @@
             }
         } // Level 12
     ],
-    _COLOR = ['#F00','#F93','#0CF','#F9C'], // NPC colors
-    _COS = [1,0,-1,0],
-    _SIN = [0,1,0,-1],
+    _COLOR = ['#F00','#F93','#0CF','#F9C'], // NPC colors red, orange, blue, pink
+    _COS = [0,1,0,-1],
+    _SIN = [-1,0,1,0],
     _LIFE = 5,
     _SCORE = 0,
     _MSG_PLAY = 'Press SPACE to play',
@@ -598,6 +598,7 @@
                                 if(dx*dx+dy*dy<750&&item.status!=4){ // Non-exception status
                                     if(item.status==3){
                                         item.status = 4;
+                                        item.path = [];
                                     }else{
                                         stage.status = 3;
                                         stage.timeout = 120;
@@ -606,7 +607,7 @@
                             }
                         });
                         var includes0 = false;
-                        for(let i=0, l=beans.data.length; i<l; i++){
+                        for(let i=0,l=beans.data.length;i<l;i++){
                             if(beans.data[i].includes(0)){
                                 includes0 = true;
                                 break;
@@ -642,46 +643,46 @@
                 cache:true,
                 draw:function(mazeContext){
                     mazeContext.lineWidth = 5;
-                    for(var j=0, y_length=this.y_length; j<y_length; j++){
-                        for(var i=0, x_length=this.x_length; i<x_length; i++){
+                    for(var j=0,y_length=this.y_length;j<y_length;j++){
+                        for(var i=0,x_length=this.x_length;i<x_length;i++){
                             var value = this.get(i,j);
                             if(value){
                                 var code = [0,0,0,0];
-                                if(this.get(i+1,j)&&!(this.get(i+1,j-1)&&this.get(i+1,j+1)&&this.get(i,j-1)&&this.get(i,j+1))){
+                                if(this.get(i,j-1)&&!(this.get(i-1,j-1)&&this.get(i+1,j-1)&&this.get(i-1,j)&&this.get(i+1,j))){
                                     code[0]=1;
                                 }
-                                if(this.get(i,j+1)&&!(this.get(i-1,j+1)&&this.get(i+1,j+1)&&this.get(i-1,j)&&this.get(i+1,j))){
+                                if(this.get(i+1,j)&&!(this.get(i+1,j-1)&&this.get(i+1,j+1)&&this.get(i,j-1)&&this.get(i,j+1))){
                                     code[1]=1;
                                 }
-                                if(this.get(i-1,j)&&!(this.get(i-1,j-1)&&this.get(i-1,j+1)&&this.get(i,j-1)&&this.get(i,j+1))){
+                                if(this.get(i,j+1)&&!(this.get(i-1,j+1)&&this.get(i+1,j+1)&&this.get(i-1,j)&&this.get(i+1,j))){
                                     code[2]=1;
                                 }
-                                if(this.get(i,j-1)&&!(this.get(i-1,j-1)&&this.get(i+1,j-1)&&this.get(i-1,j)&&this.get(i+1,j))){
+                                if(this.get(i-1,j)&&!(this.get(i-1,j-1)&&this.get(i-1,j+1)&&this.get(i,j-1)&&this.get(i,j+1))){
                                     code[3]=1;
                                 }
                                 if(code.includes(1)){
                                     mazeContext.strokeStyle=value==2?"#FFF":config['wall_color'];
                                     var pos = this.coord2position(i,j);
                                     switch(code.join('')){
-                                        case '1100':
+                                        case '0110':
                                             mazeContext.beginPath();
                                             mazeContext.arc(pos.x+this.size/2,pos.y+this.size/2,this.size/2,Math.PI,1.5*Math.PI,false);
                                             mazeContext.stroke();
                                             mazeContext.closePath();
                                             break;
-                                        case '0110':
+                                        case '0011':
                                             mazeContext.beginPath();
                                             mazeContext.arc(pos.x-this.size/2,pos.y+this.size/2,this.size/2,1.5*Math.PI,2*Math.PI,false);
                                             mazeContext.stroke();
                                             mazeContext.closePath();
                                             break;
-                                        case '0011':
+                                        case '1001':
                                             mazeContext.beginPath();
                                             mazeContext.arc(pos.x-this.size/2,pos.y-this.size/2,this.size/2,0,.5*Math.PI,false);
                                             mazeContext.stroke();
                                             mazeContext.closePath();
                                             break;
-                                        case '1001':
+                                        case '1100':
                                             mazeContext.beginPath();
                                             mazeContext.arc(pos.x+this.size/2,pos.y-this.size/2,this.size/2,.5*Math.PI,1*Math.PI,false);
                                             mazeContext.stroke();
@@ -713,8 +714,8 @@
                 data:config['map'],
                 frames:8,
                 draw:function(mazeContext){
-                    for(let j=0, y_length=this.y_length; j<y_length; j++){
-                        for(var i=0, x_length=this.x_length; i<x_length; i++){
+                    for(let j=0,y_length=this.y_length;j<y_length;j++){
+                        for(var i=0,x_length=this.x_length;i<x_length;i++){
                             if(!this.get(i,j)){
                                 var pos = this.coord2position(i,j);
                                 mazeContext.fillStyle = "#F5F5DC";
@@ -816,91 +817,303 @@
                 stage.createItem({
                     width:30,
                     height:30,
-                    orientation:3,
+                    orientation:0,
                     color:_COLOR[i],
                     location:map,
-                    coord:{x:12+i,y:14},
+                    coord:{x:12+i,y:14,offset:0},
                     vector:{x:12+i,y:14},
+                    denHome:{x:12+i,y:14}, 
+                    denEntrance:{x:12+(Math.floor(i/2)+1),y:11},
+                    inDen:true,
+                    numReversals:0,
+                    atIntersection:false,
+                    adjacentNpcOrientations:[],
                     type:2,
                     frames:10,
                     speed:1,
-                    timeout:Math.floor(Math.random()*120),
+                    timeout:((i+7)%4)*60,
                     update:function(){
                         if(stage.status==1){
-                            var new_map;
                             if(this.status==3&&!this.timeout){
                                 this.status = 1;
+                                if(this.inDen){
+                                    this.orientation = 0;
+                                }
                             }
-                            // Calculated when the center of the coordinates is reached
-                            if(!this.coord.offset){
+                            // Calculated when the center of the coordinates is reached (or if temporarily set to not move)
+                            if(
+                                !this.coord.offset||
+                                this.orientation==-1&&!this.inDen
+                            ){
                                 if(this.status==1){
                                     if(!this.timeout){
-                                        var id = this._id;
-                                        this.path = map.finder({
+                                        this.vector = map.finder({
                                             map:map.data,
                                             start:this.coord,
                                             end:player.coord
-                                        }, this, items);
-                                        if(this.path.length){
-                                            this.vector = this.path[0];
-                                        }
+                                        },this,items);
                                         stage.audioLast = '';
                                         this.audioLast = '';
                                     }
                                 }else if(this.status==3){
-                                    var id = this._id;
-                                    this.path = map.finder({
-                                        map:map.data,
-                                        start:player.coord,
-                                        end:this.coord,
-                                        type:'next'
-                                    }, this, items);
-                                    if(this.path.length){
-                                        this.vector = this.path[Math.floor(Math.random()*this.path.length)];
+                                    if(this.inDen){
+                                        this.vector = map.finder({
+                                            map:map.data,
+                                            start:this.coord,
+                                            end:this.denHome,
+                                            type:'evade'
+                                        },this,items);
+                                    }else{
+                                        this.vector = map.finder({
+                                            map:map.data,
+                                            start:this.coord,
+                                            end:this.denEntrance,
+                                            type:'evade'
+                                        },this,items,player);
                                     }
                                 }else if(this.status==4){
-                                    this.path = map.finder({
-                                        map:map.data,
-                                        start:this.coord,
-                                        end:this._params.coord
-                                        }, this, items);
-                                    if(this.path.length){
-                                        this.vector = this.path[0];
-                                    }else{
+                                    if(this.inDen&&this.orientation==-1){
                                         this.status = 1;
-                                    }
-                                    if(this.audioLast!='eating_npc'){
-                                        if(stage.audioPlaying.includes('siren')){
-                                            stage.audio.siren.pause();
+                                        this.orientation = this.vector.orientation = 0;
+                                    }else{
+                                        if(
+                                            (this.coord.x==this.denEntrance.x&&this.coord.y==this.denEntrance.y)||
+                                            this.location.get(this.coord.x,this.coord.y)==2||
+                                            this.inDen
+                                        ){
+                                            this.path = [];
+                                            this.vector = map.finder({
+                                                map:map.data,
+                                                start:this.coord,
+                                                end:this.denHome,
+                                                type:'rejuvenateStart'
+                                            },this,items);
+                                            this.inDen = true;
+                                        }else if(this.path.length){
+                                            this.vector = this.path.shift();
+                                        }else{
+                                            // Converge paths originating from NPC and originating from denEntrance
+                                            var pathsConverged = false;
+                                            var startTmp0 = Object.assign({},this.coord);
+                                            var endTmp0 = Object.assign({},this.denEntrance);
+                                            var avoidOrientation0;
+                                            var preferredOrientation0;
+                                            var numTriesInner0;
+                                            var startTmp1 = Object.assign({},this.denEntrance);
+                                            var endTmp1 = Object.assign({},this.coord);
+                                            var avoidOrientation1;
+                                            var preferredOrientation1;
+                                            var vector1;
+                                            var numTriesInner1;
+                                            var pathTmp = [];
+                                            for(var numTriesOuter=0;numTriesOuter<map.y_length;numTriesOuter++){
+                                                preferredOrientation0 = null;
+                                                for(numTriesInner0=0;numTriesInner0<map.x_length;numTriesInner0++){
+                                                    if(preferredOrientation0==null){
+                                                        if(this.path.length){
+                                                            avoidOrientation0 = (this.path[this.path.length-1].orientation+2)%4;
+                                                        }
+                                                    }
+                                                    vector0 = map.finder({
+                                                        map:map.data,
+                                                        start:startTmp0,
+                                                        end:endTmp0,
+                                                        type:'rejuvenateStart',
+                                                        avoidOrientation:avoidOrientation0,
+                                                        preferredOrientation:preferredOrientation0
+                                                    },this,items);
+                                                    if(typeof vector0.orientation!='number'||typeof vector0.x!='number'||typeof vector0.y!='number'){
+                                                        break;
+                                                    }
+                                                    if(typeof preferredOrientation0=='number'&&vector0.orientation!=preferredOrientation0){
+                                                        break;
+                                                    }
+                                                    if(vector0.orientation>-1){
+                                                        startTmp0 = endTmp1 = {x:vector0.x,y:vector0.y};
+                                                        preferredOrientation0 = vector0.orientation;
+                                                        if(pathTmp.length){
+                                                            if(startTmp0.x==startTmp1.x&&startTmp0.y==startTmp1.y){
+                                                                pathsConverged = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        this.path.push(vector0);
+                                                    }
+                                                }
+                                                if(pathsConverged){
+                                                    break;
+                                                }
+                                                for(numTriesInner1=0;numTriesInner1<map.x_length;numTriesInner1++){
+                                                    if(preferredOrientation1==null){
+                                                        if(pathTmp.length){
+                                                            avoidOrientation1 = (pathTmp[0].orientation+2)%4;
+                                                        }
+                                                    }
+                                                    vector1 = map.finder({
+                                                        map:map.data,
+                                                        start:startTmp1,
+                                                        end:endTmp1,
+                                                        type:'rejuvenateEnd',
+                                                        avoidOrientation:avoidOrientation1,
+                                                        preferredOrientation:preferredOrientation1
+                                                    },this,items);
+                                                    if(typeof vector1.orientation!='number'||typeof vector1.x!='number'||typeof vector1.y!='number'){
+                                                        break;
+                                                    }
+                                                    if(typeof preferredOrientation1=='number'&&vector1.orientation!=preferredOrientation1){
+                                                        break;
+                                                    }
+                                                    if(vector1.orientation>-1){
+                                                        startTmp1 = endTmp0 = {x:vector1.x,y:vector1.y};
+                                                        preferredOrientation1 = vector1.orientation;
+                                                        if(this.path.length){
+                                                            if(startTmp1.x==startTmp0.x&&startTmp1.y==startTmp0.y){
+                                                                pathsConverged = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        pathTmp.unshift(vector1);
+                                                    }
+                                                }
+                                                if(pathsConverged){
+                                                    break;
+                                                }
+                                            }
+                                            if(pathsConverged){
+                                                var thisPath = this.path;
+                                                pathTmp.forEach(function(path,idx){
+                                                    if(idx==0){
+                                                        if(pathTmp[0].y==thisPath[thisPath.length-1].y-1){
+                                                            path.orientation = 0;
+                                                        }else if(pathTmp[0].x==thisPath[thisPath.length-1].x+1){
+                                                            path.orientation = 1;
+                                                        }else if(pathTmp[0].y==thisPath[thisPath.length-1].y+1){
+                                                            path.orientation = 2;
+                                                        }else if(pathTmp[0].x==thisPath[thisPath.length-1].x-1){
+                                                            path.orientation = 3;
+                                                        }
+                                                    }else{
+                                                        if(path.y==pathTmp[idx-1].y-1){
+                                                            path.orientation = 0;
+                                                        }else if(path.x==pathTmp[idx-1].x+1){
+                                                            path.orientation = 1;
+                                                        }else if(path.y==pathTmp[idx-1].y+1){
+                                                            path.orientation = 2;
+                                                        }else if(path.x==pathTmp[idx-1].x-1){
+                                                            path.orientation = 3;
+                                                        }
+                                                    }
+                                                });
+                                                this.path = this.path.concat(pathTmp);
+                                            }
+                                            this.vector = this.path.shift();
                                         }
-                                        stage.audio.eating_npc.play();
-                                        this.audioLast = 'eating_npc';
-                                        // A more accurate place to score when NPC gets eaten
-                                        _SCORE += 10;
+                                        if(this.audioLast!='eating_npc'){
+                                            if(stage.audioPlaying.includes('siren')){
+                                                stage.audio.siren.pause();
+                                            }
+                                            stage.audio.eating_npc.play();
+                                            this.audioLast = 'eating_npc';
+                                            // A more accurate place to score when NPC gets eaten
+                                            _SCORE += 10;
+                                        }
                                     }
                                 }
-                                // Whether to change direction
-                                if(this.vector.change){
-                                    this.coord.x = this.vector.x;
-                                    this.coord.y = this.vector.y;
-                                    var pos = map.coord2position(this.coord.x,this.coord.y);
-                                    this.x = pos.x;
-                                    this.y = pos.y;
+                                if(
+                                    this.orientation>-1&&
+                                    this.vector&&
+                                    (Math.abs(this.coord.x-this.vector.x)>1)
+                                ){
+                                    // Emerge from other side of tunnel
+                                    var newPos = this.location.coord2position(this.vector.x,this.vector.y);
+                                    this.x = newPos.x;
+                                    this.y = newPos.y;
                                 }
+                                this.vector = this.vector || {};
                                 // Direction determination
-                                if(this.vector.x>this.coord.x){
-                                    this.orientation = 0;
-                                }else if(this.vector.x<this.coord.x){
-                                    this.orientation = 2;
-                                }else if(this.vector.y>this.coord.y){
-                                    this.orientation = 1;
-                                }else if(this.vector.y<this.coord.y){
-                                    this.orientation = 3;
+                                if(typeof this.vector.orientation=='number'){
+                                    this.orientation = this.vector.orientation;
                                 }
                             }
-                            this.x += this.speed*_COS[this.orientation];
-                            this.y += this.speed*_SIN[this.orientation];
-                            this.coord = this.location.position2coord(this.x,this.y);
+                            if(this.orientation>-1&&!(this.status==1&&this.timeout)){
+                                // TODO: ensure that moving x or y doesn't go into an illegal coord
+                                var coordNew;
+                                var xNew = this.x;
+                                var xOffset;
+                                var yNew = this.y;
+                                var yOffset;
+                                switch(this.orientation){
+                                    case 0:
+                                        yNew=this.y-1;
+                                        yOffset=this.location.getYOffset(yNew);
+                                        if(yOffset==0){
+                                            coordNew = this.location.position2coord(xNew,yNew);
+                                        }
+                                        break;
+                                    case 1:
+                                        xNew=this.x+1;
+                                        xOffset=this.location.getXOffset(xNew);
+                                        if(xOffset==0){
+                                            coordNew = this.location.position2coord(xNew,yNew);
+                                        }
+                                        break;
+                                    case 2:
+                                        yNew=this.y+1;
+                                        yOffset=this.location.getYOffset(yNew);
+                                        if(yOffset==0){
+                                            coordNew = this.location.position2coord(xNew,yNew);
+                                        }
+                                        break;
+                                    case 3:
+                                        xNew=this.x-1;
+                                        xOffset=this.location.getXOffset(xNew);
+                                        if(xOffset==0){
+                                            coordNew = this.location.position2coord(xNew,yNew);
+                                        }
+                                        break;
+                                }
+                                if(!coordNew){
+                                    var speedCoefficient = (stage.f%2)+1;
+                                    switch(index){
+                                        case 0:
+                                        case 1:
+                                        case 2:
+                                            speedCoefficient = Math.floor((stage.f%6)/5)+1;
+                                            break;
+                                        case 3:
+                                        case 4:
+                                        case 5:
+                                            speedCoefficient = Math.floor((stage.f%3)/2)+1;
+                                            break;
+                                        case 6:
+                                        case 7:
+                                        case 8:
+                                            speedCoefficient = (stage.f%2)+1;
+                                            break;
+                                        case 9:
+                                        case 10:
+                                        case 11:
+                                            speedCoefficient = Math.ceil((stage.f%3)/2)+1;
+                                            break;
+                                    }
+                                    xNew = this.x+(speedCoefficient*this.speed*_COS[this.orientation]);
+                                    yNew = this.y+(speedCoefficient*this.speed*_SIN[this.orientation]);
+                                    coordNew = this.location.position2coord(xNew,yNew);
+                                }
+                                var value = this.location.get(coordNew.x,coordNew.y);
+                                if(value==0||value==2){
+                                    this.x = xNew;
+                                    this.y = yNew;
+                                    this.coord = coordNew;
+                                }else{
+                                    // Correct drift
+                                    var posCorrected = this.location.coord2position(this.coord.x,this.coord.y);
+                                    this.x = posCorrected.x;
+                                    this.y = posCorrected.y;
+                                    this.coord = this.location.position2coord(this.x,this.y);
+                                    this.orientation = -1;
+                                }
+                            }
                         }
                     },
                     draw:function(pacdContext, charContext){
@@ -945,8 +1158,13 @@
                                 charContext.closePath();
                                 charContext.fillStyle = '#000';
                                 charContext.beginPath();
-                                charContext.arc(this.x-this.width*(.15-.04*_COS[this.orientation]),this.y-this.height*(.21-.04*_SIN[this.orientation]),this.width*.07,0,2*Math.PI,false);
-                                charContext.arc(this.x+this.width*(.15+.04*_COS[this.orientation]),this.y-this.height*(.21-.04*_SIN[this.orientation]),this.width*.07,0,2*Math.PI,false);
+                                if(this.orientation==-1){
+                                    charContext.arc(this.x-this.width*.15,this.y-this.height*.21,this.width*.07,0,2*Math.PI,false);
+                                    charContext.arc(this.x+this.width*.15,this.y-this.height*.21,this.width*.07,0,2*Math.PI,false);
+                                }else{
+                                    charContext.arc(this.x-this.width*(.15-.04*_COS[this.orientation]),this.y-this.height*(.21-.04*_SIN[this.orientation]),this.width*.07,0,2*Math.PI,false);
+                                    charContext.arc(this.x+this.width*(.15+.04*_COS[this.orientation]),this.y-this.height*(.21-.04*_SIN[this.orientation]),this.width*.07,0,2*Math.PI,false);
+                                }
                                 charContext.fill();
                                 charContext.closePath();
                             }
@@ -968,14 +1186,13 @@
             // Protagonist (Pac-Man)
             var beanCoord = {};
             var hasBean = false;
-            var hasEnergy = false;
             player = stage.createItem({
                 width:30,
                 height:30,
                 type:1,
                 location:map,
                 coord:{x:13.5,y:23}, // x is 13.5 to start at the center. Never a decimal thereafter
-                orientation:2,
+                orientation:3,
                 speed:2,
                 frames:10,
                 update:function(){
@@ -1005,7 +1222,6 @@
                                 beans.set(this.coord.x,this.coord.y,1);
                                 // Eat energy beans
                                 if(config['energy'][this.coord.x+','+this.coord.y]){
-                                    hasEnergy = true;
                                     // Eat NPC
                                     items.forEach(function(item){
                                         // If the NPC is healthy, set it to a temporary state
@@ -1014,6 +1230,14 @@
                                             item.status = 3;
                                         }
                                     });
+                                    if(stage.audioPlaying.includes('siren')){
+                                        stage.audio.siren.pause();
+                                    }
+                                    stage.audio.eating_energy.play();
+                                    stage.audioLast = 'siren';
+                                }
+                                if(!stage.audioPlaying.includes('siren')&&stage.audioLast!='siren'){
+                                    stage.audio.eating_bean.play();
                                 }
                             }
                         }else{
@@ -1021,25 +1245,6 @@
                             this.y += this.speed*_SIN[this.orientation];
                         }
                         this.coord = this.location.position2coord(this.x,this.y);
-                        if(hasBean){
-                            if(!stage.audioPlaying.includes('eating_bean')){
-                                if(hasEnergy){
-                                    if(stage.audioPlaying.includes('siren')){
-                                        stage.audio.siren.pause();
-                                    }
-                                    stage.audio.eating_energy.play();
-                                    stage.audioLast = 'siren';
-                                    hasEnergy = false;
-                                }else{
-                                    if(
-                                        !stage.audioPlaying.includes('siren')&&
-                                        stage.audioLast!='siren'
-                                    ){
-                                        stage.audio.eating_bean.play();
-                                    }
-                                }
-                            }
-                        }
                         if(stage.audioLast=='siren'){
                             if(
                                 !stage.audioPlaying.includes('eating_bean')&&
@@ -1065,9 +1270,9 @@
                     // The player is in a normal state
                     if(stage.status!=3){
                         if(this.times%2){
-                            charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.20)*Math.PI,(.5*this.orientation-.20)*Math.PI,false);
+                            charContext.arc(this.x,this.y,this.width/2,(.5*(this.orientation-1)+.20)*Math.PI,(.5*(this.orientation-1)-.20)*Math.PI,false);
                         }else{
-                            charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+.01)*Math.PI,(.5*this.orientation-.01)*Math.PI,false);
+                            charContext.arc(this.x,this.y,this.width/2,(.5*(this.orientation-1)+.01)*Math.PI,(.5*(this.orientation-1)-.01)*Math.PI,false);
                         }
                     // The player has been touched by an NPC
                     }else{
@@ -1097,25 +1302,17 @@
                             info.textContent = _MSG_PLAY;
                         }
                         break;
-                    case 39: // Right
-                        if(player.control.orientation!=0){
-                            player.control.orientation = 0;
-                        }
-                        break;
-                    case 40: // Down
-                        if(player.control.orientation!=1){
-                            player.control.orientation = 1;
-                        }
-                        break;
                     case 37: // Left
-                        if(player.control.orientation!=2){
-                            player.control.orientation = 2;
-                        }
+                        player.control.orientation = 3;
                         break;
                     case 38: // Up
-                        if(player.control.orientation!=3){
-                            player.control.orientation = 3;
-                        }
+                        player.control.orientation = 0;
+                        break;
+                    case 39: // Right
+                        player.control.orientation = 1;
+                        break;
+                    case 40: // Down
+                        player.control.orientation = 2;
                         break;
                 }
             });
