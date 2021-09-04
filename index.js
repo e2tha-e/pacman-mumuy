@@ -595,11 +595,14 @@
                             if(map&&!map.get(item.coord.x,item.coord.y)&&!map.get(player.coord.x,player.coord.y)){
                                 var dx = item.x-player.x;
                                 var dy = item.y-player.y;
+                                // When player and NPC touch
                                 if(dx*dx+dy*dy<750&&item.status!=4){ // Non-exception status
                                     if(item.status==3){
+                                        // Player beats NPC
                                         item.status = 4;
                                         item.path = [];
                                     }else{
+                                        // NPC beats player
                                         stage.status = 3;
                                         stage.timeout = 120;
                                     }
@@ -1036,7 +1039,6 @@
                                 }
                             }
                             if(this.orientation>-1&&!(this.status==1&&this.timeout)){
-                                // TODO: ensure that moving x or y doesn't go into an illegal coord
                                 var coordNew;
                                 var xNew = this.x;
                                 var xOffset;
