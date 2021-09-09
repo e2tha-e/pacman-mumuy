@@ -93,6 +93,7 @@ function Game(mazeEl, pacdEl, charEl, params){
         if (indexOfName>-1){
             this.playing.splice(indexOfName,1);
         }
+        this.element.loop = false;
         this.element.pause();
         return this;
     };
@@ -308,6 +309,11 @@ function Game(mazeEl, pacdEl, charEl, params){
                         }
                         // Emerge from other side of tunnel
                         if(toValue==-1){
+console.warn(Date())
+console.warn('EMERGING FROM TUNNEL');
+console.warn(item);
+console.warn('from',from)
+console.warn('to',to)
                             to.x = (to.x+x_length)%x_length;
                         }
                         // Check 1 coord further in same orientation for an NPC. Return empty object if so

@@ -589,7 +589,6 @@
             var stage,map,beans,items,player;
             stage = game.createStage({
                 update:function(){
-                    var stage = this;
                     if(stage.status==1){ // Normal running status
                         items.forEach(function(item){
                             if(map&&!map.get(item.coord.x,item.coord.y)&&!map.get(player.coord.x,player.coord.y)){
@@ -617,9 +616,10 @@
                             }
                         }
                         if(!includes0){
-                            if(!this.nextStage){
-                                this.nextStage = true;
+                            if(!stage.nextStage){
+                                stage.nextStage = true;
                             }else{
+                                stage.audio.eating_bean.pause();
                                 game.nextStage();
                             }
                         }
@@ -1239,8 +1239,14 @@
                                     stage.audioLast = 'siren';
                                 }
                                 if(!stage.audioPlaying.includes('siren')&&stage.audioLast!='siren'){
-                                    stage.audio.eating_bean.play();
+                                    if(!stage.audioPlaying.includes('eating_bean')){
+                                        stage.audio.eating_bean.element.loop = true;
+                                        stage.audio.eating_bean.play();
+                                    }
                                 }
+                            }else{
+                                stage.audio.eating_bean.element.currentTime = 0;
+                                stage.audio.eating_bean.pause();
                             }
                         }else{
                             this.x += this.speed*_COS[this.orientation];
@@ -1279,7 +1285,8 @@
                     // The player has been touched by an NPC
                     }else{
                         var timeoutOffset = stage.timeout-90;
-                        if(timeoutOffset>0){
+                        if(timeoutOffset>0&&!stage.nextStage){
+                            stage.audio.eating_bean.pause();
                             stage.audio.die.play();
                             charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+1-.02*timeoutOffset)*Math.PI,(.5*this.orientation-1+.02*timeoutOffset)*Math.PI,false);
                         }
@@ -1301,6 +1308,7 @@
                             info.textContent = _MSG_PAUSE;
                         }else{
                             this.status = 2;
+                            stage.audio.eating_bean.pause();
                             info.textContent = _MSG_PLAY;
                         }
                         break;
