@@ -93,6 +93,7 @@ function Game(mazeEl, pacdEl, charEl, params){
         if (indexOfName>-1){
             this.playing.splice(indexOfName,1);
         }
+        this.element.loop = false;
         this.element.pause();
         return this;
     };
@@ -111,7 +112,6 @@ function Game(mazeEl, pacdEl, charEl, params){
             type:0, // 0 for normal objects (not tied to the map), 1 for player control objects, 2 for program control objects
             color:'#F00',
             status:1, // 0 for inactive/ended, 1 for normal, 2 for paused, 3 for temporary, 4 for exception
-            audioLast:'',
             orientation:0, // 0 for up, 1 for right, 2 for down, 3 for left, -1 for stay put
             speed:0,
             // Map-related
@@ -373,9 +373,12 @@ function Game(mazeEl, pacdEl, charEl, params){
                 }
                 // If NPC is sick and not in den, factor in distance from player
                 if(item.status==3){
-                    if(!item.inDen&&player){
-                        // Give greater weight to distanceFromPlayer by multiplying by 2
-                        var distanceFromPlayer=2*(Math.abs(player.coord.x-vector.x)+Math.abs(player.coord.y-vector.y));
+                    if(
+                        !item.inDen&&player&&
+                        vector.x!=0&&vector.x!=x_length-1 // Do not factor distance if emerging from tunnel
+                    ){
+                        // Give greater weight to distanceFromPlayer by multiplying by 3
+                        var distanceFromPlayer=3*(Math.abs(player.coord.x-vector.x)+Math.abs(player.coord.y-vector.y));
                         contestingDistance -= distanceFromPlayer;
                     }
                 }else if(item.status==1){
@@ -478,7 +481,6 @@ function Game(mazeEl, pacdEl, charEl, params){
             maps:[],
             audio:{},
             audioPlaying:[],
-            audioLast:'',
             images:[],
             items:[],
             timeout:0, // For determining when to proceed to next animation state
@@ -580,7 +582,6 @@ function Game(mazeEl, pacdEl, charEl, params){
             var mapNext = stage.maps[stage.index+1];
             stage.f = stage.f||0;
             var stageUpdate = stage.update();
-            //if(stage.update()==true){
             if(stageUpdate==true){
                 stage.f++;
                 if(stage.timeout){
