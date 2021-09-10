@@ -308,11 +308,6 @@ function Game(mazeEl, pacdEl, charEl, params){
                         }
                         // Emerge from other side of tunnel
                         if(toValue==-1){
-console.warn(Date())
-console.warn('EMERGING FROM TUNNEL');
-console.warn(item);
-console.warn('from',from)
-console.warn('to',to)
                             to.x = (to.x+x_length)%x_length;
                         }
                         // Check 1 coord further in same orientation for an NPC. Return empty object if so
@@ -378,9 +373,12 @@ console.warn('to',to)
                 }
                 // If NPC is sick and not in den, factor in distance from player
                 if(item.status==3){
-                    if(!item.inDen&&player){
-                        // Give greater weight to distanceFromPlayer by multiplying by 2
-                        var distanceFromPlayer=2*(Math.abs(player.coord.x-vector.x)+Math.abs(player.coord.y-vector.y));
+                    if(
+                        !item.inDen&&player&&
+                        vector.x!=0&&vector.x!=x_length-1 // Do not factor distance if emerging from tunnel
+                    ){
+                        // Give greater weight to distanceFromPlayer by multiplying by 3
+                        var distanceFromPlayer=3*(Math.abs(player.coord.x-vector.x)+Math.abs(player.coord.y-vector.y));
                         contestingDistance -= distanceFromPlayer;
                     }
                 }else if(item.status==1){
