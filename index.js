@@ -590,6 +590,7 @@
             stage = game.createStage({
                 update:function(){
                     if(stage.status==1){ // Normal running status
+                        var itemTimeouts = 0;
                         items.forEach(function(item){
                             if(map&&!map.get(item.coord.x,item.coord.y)&&!map.get(player.coord.x,player.coord.y)){
                                 var dx = item.x-player.x;
@@ -600,6 +601,9 @@
                                         // Player beats NPC
                                         item.status = 4;
                                         item.path = [];
+                                        item.timeout = 0;
+                                        stage.audio.eating_npc.play();
+                                        _SCORE += 10;
                                     }else{
                                         // NPC beats player
                                         stage.status = 3;
@@ -607,7 +611,11 @@
                                     }
                                 }
                             }
+                            itemTimeouts += item.timeout;
                         });
+                        if(stage.audioPlaying.includes('siren')&&!itemTimeouts){
+                            stage.audio.siren.pause();
+                        }
                         var includes0 = false;
                         for(let i=0,l=beans.data.length;i<l;i++){
                             if(beans.data[i].includes(0)){
@@ -620,6 +628,7 @@
                                 stage.nextStage = true;
                             }else{
                                 stage.audio.eating_bean.pause();
+                                stage.audio.siren.pause();
                                 game.nextStage();
                             }
                         }
@@ -838,6 +847,7 @@
                     update:function(){
                         if(stage.status==1){
                             if(this.status==3&&!this.timeout){
+                                stage.audio.siren.pause();
                                 this.status = 1;
                                 if(this.inDen){
                                     this.orientation = 0;
@@ -855,8 +865,6 @@
                                             start:this.coord,
                                             end:player.coord
                                         },this,items);
-                                        stage.audioLast = '';
-                                        this.audioLast = '';
                                     }
                                 }else if(this.status==3){
                                     if(this.inDen){
@@ -1010,15 +1018,6 @@
                                                 this.path = this.path.concat(pathTmp);
                                             }
                                             this.vector = this.path.shift();
-                                        }
-                                        if(this.audioLast!='eating_npc'){
-                                            if(stage.audioPlaying.includes('siren')){
-                                                stage.audio.siren.pause();
-                                            }
-                                            stage.audio.eating_npc.play();
-                                            this.audioLast = 'eating_npc';
-                                            // A more accurate place to score when NPC gets eaten
-                                            _SCORE += 10;
                                         }
                                     }
                                 }
@@ -1228,40 +1227,32 @@
                                     items.forEach(function(item){
                                         // If the NPC is healthy, set it to a temporary state
                                         if(item.status==1||item.status==3){
-                                            item.timeout = 450;
+                                            item.timeout = 450; // Should be 10 seconds
                                             item.status = 3;
                                         }
                                     });
-                                    if(stage.audioPlaying.includes('siren')){
-                                        stage.audio.siren.pause();
-                                    }
                                     stage.audio.eating_energy.play();
-                                    stage.audioLast = 'siren';
+                                    stage.audio.siren.element.loop = true;
+                                    stage.audio.siren.play();
                                 }
-                                if(!stage.audioPlaying.includes('siren')&&stage.audioLast!='siren'){
-                                    if(!stage.audioPlaying.includes('eating_bean')){
-                                        stage.audio.eating_bean.element.loop = true;
-                                        stage.audio.eating_bean.play();
-                                    }
+                                if(!stage.audioPlaying.includes('eating_bean')){
+                                    stage.audio.eating_bean.element.loop = true;
+                                    stage.audio.eating_bean.play();
                                 }
                             }else{
-                                stage.audio.eating_bean.element.currentTime = 0;
-                                stage.audio.eating_bean.pause();
+                                if(stage.audioPlaying.includes('eating_bean')){
+                                    // Pause eating_bean as it gets close to completing the loop
+                                    if(stage.audio.eating_bean.element.currentTime>0.2){
+                                        stage.audio.eating_bean.pause();
+                                        stage.audio.eating_bean.element.currentTime = 0;
+                                    }
+                                }
                             }
                         }else{
                             this.x += this.speed*_COS[this.orientation];
                             this.y += this.speed*_SIN[this.orientation];
                         }
                         this.coord = this.location.position2coord(this.x,this.y);
-                        if(stage.audioLast=='siren'){
-                            if(
-                                !stage.audioPlaying.includes('eating_bean')&&
-                                !stage.audioPlaying.includes('eating_energy')&&
-                                !stage.audioPlaying.includes('eating_npc')
-                            ){
-                                stage.audio.siren.play();
-                            }
-                        }
                     }
                 },
                 draw:function(pacdContext, charContext){
@@ -1287,6 +1278,7 @@
                         var timeoutOffset = stage.timeout-90;
                         if(timeoutOffset>0&&!stage.nextStage){
                             stage.audio.eating_bean.pause();
+                            stage.audio.siren.pause();
                             stage.audio.die.play();
                             charContext.arc(this.x,this.y,this.width/2,(.5*this.orientation+1-.02*timeoutOffset)*Math.PI,(.5*this.orientation-1+.02*timeoutOffset)*Math.PI,false);
                         }
@@ -1309,6 +1301,7 @@
                         }else{
                             this.status = 2;
                             stage.audio.eating_bean.pause();
+                            stage.audio.siren.pause();
                             info.textContent = _MSG_PLAY;
                         }
                         break;

@@ -112,7 +112,6 @@ function Game(mazeEl, pacdEl, charEl, params){
             type:0, // 0 for normal objects (not tied to the map), 1 for player control objects, 2 for program control objects
             color:'#F00',
             status:1, // 0 for inactive/ended, 1 for normal, 2 for paused, 3 for temporary, 4 for exception
-            audioLast:'',
             orientation:0, // 0 for up, 1 for right, 2 for down, 3 for left, -1 for stay put
             speed:0,
             // Map-related
@@ -484,7 +483,6 @@ console.warn('to',to)
             maps:[],
             audio:{},
             audioPlaying:[],
-            audioLast:'',
             images:[],
             items:[],
             timeout:0, // For determining when to proceed to next animation state
@@ -586,7 +584,6 @@ console.warn('to',to)
             var mapNext = stage.maps[stage.index+1];
             stage.f = stage.f||0;
             var stageUpdate = stage.update();
-            //if(stage.update()==true){
             if(stageUpdate==true){
                 stage.f++;
                 if(stage.timeout){
