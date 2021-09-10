@@ -1227,8 +1227,7 @@
                                     items.forEach(function(item){
                                         // If the NPC is healthy, set it to a temporary state
                                         if(item.status==1||item.status==3){
-                                            item.timeout = 850; // Should be 10 seconds
-                                            //item.timeout = 450; // Should be 10 seconds
+                                            item.timeout = 450; // Should be 10 seconds
                                             item.status = 3;
                                         }
                                     });
