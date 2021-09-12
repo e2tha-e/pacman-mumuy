@@ -626,9 +626,9 @@
                         if(!includes0){
                             if(!stage.nextStage){
                                 stage.nextStage = true;
-                            }else{
                                 stage.audio.eating_bean.pause();
                                 stage.audio.siren.pause();
+                            }else{
                                 game.nextStage();
                             }
                         }
@@ -1241,11 +1241,8 @@
                                 }
                             }else{
                                 if(stage.audioPlaying.includes('eating_bean')){
-                                    // Pause eating_bean as it gets close to completing the loop
-                                    if(stage.audio.eating_bean.element.currentTime>0.2){
-                                        stage.audio.eating_bean.pause();
-                                        stage.audio.eating_bean.element.currentTime = 0;
-                                    }
+                                    stage.audio.eating_bean.pause();
+                                    stage.audio.eating_bean.element.currentTime = 0;
                                 }
                             }
                         }else{
