@@ -579,7 +579,7 @@
         });
 
         stage.createAudioHandler('opening');
-        stage.audio.opening.load();
+        stage.audio.opening.load(stage);
         stage.audio.opening.play();
     })();
 
@@ -602,8 +602,12 @@
                                         item.status = 4;
                                         item.path = [];
                                         item.timeout = 0;
-                                        stage.audio.eating_npc.play();
                                         _SCORE += 10;
+                                        if(!stage.audioPlaying.includes('eating_npc')){
+                                            stage.audio.eating_npc.play();
+                                        }else{
+                                            stage.audioToPlay.push('eating_npc');
+                                        }
                                     }else{
                                         // NPC beats player
                                         stage.status = 3;
@@ -616,6 +620,9 @@
                         if(stage.audioPlaying.includes('siren')&&!itemTimeouts){
                             stage.audio.siren.pause();
                         }
+                        if(stage.audioToPlay.includes('eating_npc')&&!stage.audioPlaying.includes('eating_npc')){
+                            stage.audio.eating_npc.play();
+                        }
                         var includes0 = false;
                         for(let i=0,l=beans.data.length;i<l;i++){
                             if(beans.data[i].includes(0)){
@@ -626,9 +633,10 @@
                         if(!includes0){
                             if(!stage.nextStage){
                                 stage.nextStage = true;
+                            }else{
+                                // Putting the audio here instead of in the previous block so there is a slight bit of sound when the final bean is eaten
                                 stage.audio.eating_bean.pause();
                                 stage.audio.siren.pause();
-                            }else{
                                 game.nextStage();
                             }
                         }
@@ -823,7 +831,7 @@
 
             // NPC
             stage.createAudioHandler('eating_npc');
-            stage.audio.eating_npc.load(stage.audioPlaying);
+            stage.audio.eating_npc.load(stage);
 
             for(var i=0;i<4;i++){
                 stage.createItem({
@@ -1179,10 +1187,10 @@
             stage.createAudioHandler('eating_energy');
             stage.createAudioHandler('siren');
             stage.createAudioHandler('die');
-            stage.audio.eating_bean.load(stage.audioPlaying);
-            stage.audio.eating_energy.load(stage.audioPlaying);
-            stage.audio.siren.load(stage.audioPlaying);
-            stage.audio.die.load(stage.audioPlaying);
+            stage.audio.eating_bean.load(stage);
+            stage.audio.eating_energy.load(stage);
+            stage.audio.siren.load(stage);
+            stage.audio.die.load(stage);
 
             // Protagonist (Pac-Man)
             var beanCoord = {};

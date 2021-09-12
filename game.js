@@ -69,10 +69,11 @@ function Game(mazeEl, pacdEl, charEl, params){
         }
         Object.assign(this,this._settings,this._params);
     }
-    AudioHandler.prototype.load = function(playing){
+    AudioHandler.prototype.load = function(stage){
         var audioHandler = this;
         this.element = new Audio(this.uri);
-        this.playing = playing||this.playing;
+        this.playing = stage.audioPlaying||this.playing;
+        this.toPlay = stage.audioToPlay||this.toPlay;
         this.element.addEventListener('ended', function(){
             var indexOfName = audioHandler.playing.indexOf(audioHandler.name);
             if (indexOfName>-1){
@@ -82,6 +83,10 @@ function Game(mazeEl, pacdEl, charEl, params){
         return this;
     };
     AudioHandler.prototype.play = function(){
+        var indexOfName = this.toPlay.indexOf(this.name);
+        if (indexOfName>-1){
+            this.toPlay.splice(indexOfName,1);
+        }
         if(!this.playing.includes(this.name)){
             this.playing.push(this.name);
         }
@@ -481,6 +486,7 @@ function Game(mazeEl, pacdEl, charEl, params){
             maps:[],
             audio:{},
             audioPlaying:[],
+            audioToPlay:[],
             images:[],
             items:[],
             timeout:0, // For determining when to proceed to next animation state
